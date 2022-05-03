@@ -37,4 +37,12 @@ public class Professor {
 	public void setArea(String area) {
 		this.area = area;
 	}
+
+	public void setTeste(String teste) {
+
+	}
+
+	public String getTeste() {
+		return "Teste";
+	}
 }

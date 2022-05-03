@@ -15,58 +15,54 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class ProfessorController {
 
-	private List<Professor> professores;
+	private ProfessorRepositorio repo;
 
 	public ProfessorController() {
-		this.professores = new ArrayList<>();
-		professores.add(new Professor(1, "Ana", 1111, "Segurança"));
-		professores.add(new Professor(2, "Bob", 2222, "Biologia"));
-		professores.add(new Professor(3, "Charles", 3333, "Economia"));
+		this.repo = ProfessorRepositorio.getInstance();
+		
+		repo.addProfessor(new Professor(1, "Ana", 1111, "Segurança"));
+		repo.addProfessor(new Professor(2, "Bob", 2222, "Biologia"));
+		repo.addProfessor(new Professor(3, "Charles", 3333, "Economia"));
 	}
 
 	@GetMapping("/api/professores")
 	Iterable<Professor> getProfessores() {
-		return this.professores;
+		return this.repo.getProfessores();
 	}
 	
 	@GetMapping("/api/professores/{id}")
-	Optional<Professor> getProfessor(@PathVariable long id) {
-		for (Professor p: professores) {
-			if (p.getId() == id) {
-				return Optional.of(p);
-			}
-		}
-		return Optional.empty();
+	Professor getProfessor(@PathVariable long id) {
+		Professor p = this.repo.getProfessor(id);
+		return p;
 	}
 	
 	@PostMapping("/api/professores")
 	Professor createProfessor(@RequestBody Professor p) {
 		long maxId = 1;
-		for (Professor prof: professores) {
+		for (Professor prof: this.repo.getProfessores()) {
 			if (prof.getId() > maxId) {
 				maxId = prof.getId();
 			}
 		}
 		p.setId(maxId+1);
-		professores.add(p);
+		this.repo.addProfessor(p);
 		return p;
 	}
 	
 	@PutMapping("/api/professores/{professorId}")
-	Optional<Professor> updateProfessor(@RequestBody Professor professorRequest, @PathVariable long professorId) {
-		Optional<Professor> opt = this.getProfessor(professorId);
-		if (opt.isPresent()) {
-			Professor professor = opt.get();
-			professor.setNome(professorRequest.getNome());
-			professor.setMatricula(professorRequest.getMatricula());
-			professor.setArea(professorRequest.getArea());
+	Professor updateProfessor(@RequestBody Professor professorRequest, @PathVariable long professorId) {
+		Professor p = this.getProfessor(professorId);
+		if (p != null) {
+			p.setNome(professorRequest.getNome());
+			p.setMatricula(professorRequest.getMatricula());
+			p.setArea(professorRequest.getArea());
 		}
 
-		return opt;				
+		return p;
 	}	
 	
 	@DeleteMapping(value = "/api/professores/{id}")
 	void deleteProfessor(@PathVariable long id) {
-		professores.removeIf(p -> p.getId() == id);
+		this.repo.removerProfessor(id);
 	}		
 }
